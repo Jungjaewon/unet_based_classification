@@ -372,14 +372,14 @@ class Solver(object):
             results = np.array(results)
 
             opt_thres = OptThreshold()
-            opt_result_txt = osp.join(self.train_dir, self.sample_dir,
+            opt_result_txt = osp.join(self.sample_dir,
                                       'test_opt_result_epoch_{}.txt'.format(str(epoch).zfill(3)))
             _, y_score_opt = opt_thres.find_optimal_cutoff(target_numpy, results, opt_result_txt)
             plotingConfusionMatrix(target_numpy, pred_idx_numpy, class_list, epoch,
-                                   osp.join(self.train_dir, self.sample_dir), prefix='test_plain_')
+                                   osp.join(self.sample_dir), prefix='test_plain_')
             plotingConfusionMatrix(target_numpy, y_score_opt, class_list, epoch,
-                                   osp.join(self.train_dir, self.sample_dir), prefix='test_opt_')
-            calculateROC(target_numpy, results, 1, class_list, epoch, osp.join(self.train_dir, self.sample_dir),
+                                   osp.join(self.sample_dir), prefix='test_opt_')
+            calculateROC(target_numpy, results, 1, class_list, epoch, osp.join(self.sample_dir),
                          prefix='test_')
 
             if self.use_tensorboard:
