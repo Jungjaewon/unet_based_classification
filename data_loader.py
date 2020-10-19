@@ -17,7 +17,7 @@ class DataSet(data.Dataset):
         else:
             self.img_dir = osp.join(config['TRAINING_CONFIG']['IMG_DIR_TEST'])
         #self.img_dir = osp.join(config['TRAINING_CONFIG']['IMG_DIR'], config['TRAINING_CONFIG']['MODE'])
-        self.img_size = (config['MODEL_CONFIG']['IMG_SIZE'], config['MODEL_CONFIG']['IMG_SIZE'], 3)
+        self.img_size = (config['MODEL_CONFIG']['IMG_SIZE_H'], config['MODEL_CONFIG']['IMG_SIZE_W'], 1)
 
         self.data_list = glob.glob(os.path.join(self.img_dir, '*.jpg'))
         self.data_list = list(set(self.data_list))
@@ -27,7 +27,7 @@ class DataSet(data.Dataset):
         patient_id = int(patient_view.replace('.jpg', '')[:-4])
         view_id = int(patient_view.replace('.jpg', '')[-4:])
         target_image = Image.open(self.data_list[index])
-        target_image = target_image.convert('RGB')
+        target_image = target_image.convert('L')
 
         if target == 'f':
             target_value = 1
@@ -42,9 +42,10 @@ class DataSet(data.Dataset):
 def get_loader(config):
 
     img_transform = list()
-    img_size = config['MODEL_CONFIG']['IMG_SIZE']
+    img_size_h = config['MODEL_CONFIG']['IMG_SIZE_H']
+    img_size_w = config['MODEL_CONFIG']['IMG_SIZE_W']
 
-    img_transform.append(T.Resize((img_size, img_size)))
+    img_transform.append(T.Resize((img_size_h, img_size_w)))
     img_transform.append(T.ToTensor())
     img_transform.append(T.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)))
     img_transform = T.Compose(img_transform)
