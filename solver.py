@@ -181,6 +181,7 @@ class Solver(object):
 
         fixed_train_images = fixed_train_images.to(self.gpu)
         fixed_target = fixed_target.to(self.gpu)
+        fixed_target = fixed_target.squeeze()
 
         # Learning rate cache for decaying.
         g_lr = self.g_lr
@@ -194,9 +195,11 @@ class Solver(object):
             for i in range(iterations):
                 try:
                     _, _, train_images, target = next(data_iter)
+                    target = target.squeeze()
                 except:
                     data_iter = iter(data_loader)
                     _, _, train_images, target = next(data_iter)
+                    target = target.squeeze()
 
                 train_images = train_images.to(self.gpu)
                 target = target.to(self.gpu)
