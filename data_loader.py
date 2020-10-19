@@ -27,7 +27,7 @@ class DataSet(data.Dataset):
         patient_id = int(patient_view.replace('.jpg', '')[:-4])
         view_id = int(patient_view.replace('.jpg', '')[-4:])
         target_image = Image.open(self.data_list[index])
-        target_image = target_image.convert('L')
+        target_image = target_image.convert('RGB')
 
         if target == 'f':
             target_value = 1
