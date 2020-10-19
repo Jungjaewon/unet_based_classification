@@ -73,8 +73,6 @@ class Solver(object):
             self.gpu = None
             self.gpu_list = None
 
-        self.use_tensorboard = config['TRAINING_CONFIG']['USE_TENSORBOARD']
-
         # Directory
         self.train_dir  = config['TRAINING_CONFIG']['TRAIN_DIR']
         self.log_dir    = os.path.join(self.train_dir, config['TRAINING_CONFIG']['LOG_DIR'])
@@ -91,6 +89,8 @@ class Solver(object):
 
         self.build_model()
 
+        self.use_tensorboard = config['TRAINING_CONFIG']['USE_TENSORBOARD']
+        
         if self.use_tensorboard == 'True':
             self.build_tensorboard()
 
