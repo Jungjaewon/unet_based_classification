@@ -61,11 +61,13 @@ class Solver(object):
 
         self.gpu = config['TRAINING_CONFIG']['GPU']
 
-        if self.gpu  != '':
-            self.gpu_list = [int(gpu) for gpu in self.gpu .split(',')]
+        if self.gpu != '':
+            self.gpu_list = [int(gpu) for gpu in self.gpu.split(',')]
             self.num_gpu = len(self.gpu_list)
             if len(self.gpu_list):
                 self.gpu = torch.device('cuda:' + str(self.gpu_list[0]))
+            print('num_gpu : ', self.num_gpu)
+            print('gpu : ', self.gpu)
         else:
             self.num_gpu = 0
             self.gpu = None
