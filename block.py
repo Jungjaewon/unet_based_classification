@@ -4,10 +4,10 @@ import torch.nn.functional as F
 from spectral_normalization import SpectralNorm
 
 
-class ResBlockNet(nn.Module):
+class ResBlock(nn.Module):
 
     def __init__(self, in_channels, out_channels):
-        super(ResBlockNet, self).__init__()
+        super(ResBlock, self).__init__()
         self.main = list()
         self.main.append(nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, stride=1))
         self.main.append(nn.BatchNorm2d(out_channels, affine=True, track_running_stats=True))
