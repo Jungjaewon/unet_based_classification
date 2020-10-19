@@ -47,7 +47,7 @@ def get_loader(config):
 
     img_transform.append(T.Resize((img_size_h, img_size_w)))
     img_transform.append(T.ToTensor())
-    img_transform.append(T.Normalize(mean=0.5, std=0.5))
+    img_transform.append(T.Normalize(mean=(0.5,0.5,0.5), std=(0.5,0.5,0.5)))
     img_transform = T.Compose(img_transform)
 
     dataset_train = DataSet(config, img_transform, 'train')
