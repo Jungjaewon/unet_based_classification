@@ -316,8 +316,12 @@ class Solver(object):
                 self.testing(e + 1, self.data_loader_test)
             # Save model checkpoints.
             if (e + 1) % self.save_step == 0 and (e + 1) >= self.save_start:
-                G_path = os.path.join(self.model_dir, '{}-G.ckpt'.format(e + 1))
-                D_path = os.path.join(self.model_dir, '{}-D.ckpt'.format(e + 1))
+                if self.num_gpu > 1:
+                    G_path = os.path.join(self.model_dir, 'module-{}-G.ckpt'.format(e + 1))
+                    D_path = os.path.join(self.model_dir, 'module-{}-D.ckpt'.format(e + 1))
+                else:
+                    G_path = os.path.join(self.model_dir, '{}-G.ckpt'.format(e + 1))
+                    D_path = os.path.join(self.model_dir, '{}-D.ckpt'.format(e + 1))
                 torch.save(self.G.state_dict(), G_path)
                 torch.save(self.D.state_dict(), D_path)
                 print('Saved model checkpoints into {}...'.format(self.model_dir))
