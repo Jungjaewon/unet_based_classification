@@ -102,6 +102,7 @@ class UNet(nn.Module):
         image = self.outc(x_up4)
 
         #classification part
+        x_up1 = self.down_sample(x_up1)
         x_conv2 = self.down_sample(self.conv2(x_up2))
         x_conv3 = self.down_sample(self.conv3(x_up3))
         x_conv4 = self.down_sample(self.conv4(x_up4))
