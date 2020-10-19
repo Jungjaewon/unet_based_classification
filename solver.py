@@ -38,7 +38,6 @@ class Solver(object):
         self.mse_loss = nn.MSELoss()
         self.cross_entropy = nn.CrossEntropyLoss()
 
-        self.triplet = config['TRAINING_CONFIG']['TRIPLE_LOSS'] == 'True'
         self.gan_loss = config['TRAINING_CONFIG']['GAN_LOSS']
         assert self.gan_loss in ['lsgan', 'wgan', 'vanilla']
 
