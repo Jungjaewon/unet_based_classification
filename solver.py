@@ -208,6 +208,8 @@ class Solver(object):
                     d_loss = None
 
                     real_score, d_pred = self.D(train_images)
+                    print("d_pred : ", d_pred)
+                    print("d_pred : ", d_pred.size())
                     fake_score, _ = self.D(fake_images.detach())
                     d_classification = self.cross_entropy(d_pred, target)
 

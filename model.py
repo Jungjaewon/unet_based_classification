@@ -110,6 +110,4 @@ class UNet(nn.Module):
         x_concat = torch.cat([x_up1, x_conv2, x_conv3, x_conv4],dim=1)
         x_concat = x_concat.view(x_concat.size()[0], -1)
         pred = self.fc(x_concat)
-        print('pred : ', pred.size())
-        print('image : ', image.size())
         return image, self.fc(x_concat)
