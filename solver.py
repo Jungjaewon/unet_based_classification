@@ -228,7 +228,6 @@ class Solver(object):
 
                 loss_dict = dict()
                 if (i + 1) % self.d_critic == 0:
-                    print("train_images :", train_images.get_device())
                     fake_images, _ = self.G(train_images)
                     d_loss = None
 
