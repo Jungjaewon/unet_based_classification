@@ -21,7 +21,6 @@ class DataSet(data.Dataset):
 
         self.data_list = glob.glob(os.path.join(self.img_dir, '*.jpg'))
         self.data_list = list(set(self.data_list))
-        print('len self.data_list  : ', len(self.data_list))
 
     def __getitem__(self, index):
         target, patient_view, _ = self.data_list[index].split(os.sep)[-1].split('_')
@@ -48,7 +47,7 @@ def get_loader(config):
 
     img_transform.append(T.Resize((img_size_h, img_size_w)))
     img_transform.append(T.ToTensor())
-    img_transform.append(T.Normalize(mean=(0.5), std=(0.5)))
+    img_transform.append(T.Normalize(mean=0.5, std=0.5))
     img_transform = T.Compose(img_transform)
 
     dataset_train = DataSet(config, img_transform, 'train')
