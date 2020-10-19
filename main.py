@@ -33,6 +33,8 @@ def main(config):
         solver.train()
     elif config['TRAINING_CONFIG']['MODE'] == 'test':
         solver.test()
+    elif config['TRAINING_CONFIG']['MODE'] == 'gradcam':
+        solver.gradcam()
     print('{} is finished'.format(config['TRAINING_CONFIG']['MODE']))
 
 

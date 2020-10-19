@@ -1,9 +1,9 @@
 import os
+import cv2
 import time
 import datetime
 import torch
 import torch.nn as nn
-import glob
 import os.path as osp
 import numpy as np
 import torch.nn.functional as F
@@ -24,6 +24,8 @@ class Solver(object):
         self.data_loader_test = data_loader_test
 
         self.epoch         = config['TRAINING_CONFIG']['EPOCH']
+        self.g_model_path    = config['TRAINING_CONFIG']['G_MODEL_PATH']
+        self.d_model_path    = config['TRAINING_CONFIG']['D_MODEL_PATH']
         self.batch_size    = config['TRAINING_CONFIG']['BATCH_SIZE']
         self.g_lr          = float(config['TRAINING_CONFIG']['G_LR'])
         self.d_lr          = float(config['TRAINING_CONFIG']['D_LR'])
@@ -97,7 +99,6 @@ class Solver(object):
     def build_model(self):
 
         if self.num_gpu > 1:
-            print("Multi-gpu use")
             self.G = nn.DataParallel(UNet(in_channels=3, out_channels=3, spec_norm=self.g_spec, LR=0.02), device_ids=self.gpu_list).to(self.gpu)
             self.D = nn.DataParallel(Discriminator(in_channel=3, spec_norm=self.d_spec, LR=0.02), device_ids=self.gpu_list).to(self.gpu)
         elif self.num_gpu == 1:
@@ -165,32 +166,38 @@ class Solver(object):
 
     def restore_model(self):
 
-        ckpt_list = glob.glob(osp.join(self.model_dir, '*-G.ckpt'))
+        if not (os.path.exists(self.g_model_path) and os.path.exists(self.d_model_path)):
+            print("Please Check the g_model_path and d_model_path")
+            return
 
-        if len(ckpt_list) == 0:
-            return 0
+        if self.g_model_path.split(os.sep)[-1].startswith('module-') and self.d_model_path .split(os.sep)[-1].startswith('module-'):
+            g_state_dict = torch.load(self.g_model_path, map_location=lambda storage, loc: storage)
+            d_state_dict = torch.load(self.d_model_path, map_location=lambda storage, loc: storage)
+            # https://github.com/computationalmedia/semstyle/issues/3
+            # https://github.com/pytorch/pytorch/issues/10622
+            # https://discuss.pytorch.org/t/saving-and-loading-torch-models-on-2-machines-with-different-number-of-gpu-devices/6666/2
+            from collections import OrderedDict
+            g_new_state_dict = OrderedDict()
+            d_new_state_dict = OrderedDict()
+            for k, v in g_state_dict.items():
+                name = k[7:]  # remove `module.`
+                g_new_state_dict[name] = v
+            for k, v in d_state_dict.items():
+                name = k[7:]  # remove `module.`
+                d_new_state_dict[name] = v
+            self.G.load_state_dict(g_new_state_dict)
+            self.D.load_state_dict(d_new_state_dict)
+        else:
+            self.G.load_state_dict(torch.load(self.g_model_path, map_location=lambda storage, loc: storage))
+            self.D.load_state_dict(torch.load(self.d_model_path, map_location=lambda storage, loc: storage))
 
-        ckpt_list = [int(x[0]) for x in ckpt_list]
-        ckpt_list.sort()
-        epoch = ckpt_list[-1]
-        G_path = os.path.join(self.model_dir, '{}-G.ckpt'.format(epoch))
-        D_path = os.path.join(self.model_dir, '{}-D.ckpt'.format(epoch))
-        self.G.load_state_dict(torch.load(G_path, map_location=lambda storage, loc: storage))
-        self.D.load_state_dict(torch.load(D_path, map_location=lambda storage, loc: storage))
-        self.G.to(self.gpu)
-        self.D.to(self.gpu)
-        return epoch
+        if self.num_gpu > 1:
+            self.G = nn.DataParallel(self.G, device_ids=self.gpu_list).to(self.gpu)
+            self.D = nn.DataParallel(self.D, device_ids=self.gpu_list).to(self.gpu)
+        elif self.num_gpu == 1:
+            self.G = self.G.to(self.gpu)
+            self.D = self.D.to(self.gpu)
 
-    """
-    prediction = self.model(train_images)
-    # prediction shape is (batch_size , numClass)
-    # target shape is (batch_size)
-    traingLoss = self.criterion(prediction, target) * self.lambdaLoss
-
-    _, prd_idx = torch.max(prediction, 1)
-    correct = (prd_idx == target).sum().cpu().item()
-
-    """
     def train(self):
 
         # Set data loader.
@@ -209,10 +216,9 @@ class Solver(object):
         g_lr = self.g_lr
         d_lr = self.d_lr
 
-        start_epoch = self.restore_model()
         start_time = time.time()
         print('Start training...')
-        for e in range(start_epoch, self.epoch):
+        for e in range(self.epoch):
 
             for i in range(iterations):
                 try:
@@ -390,4 +396,74 @@ class Solver(object):
 
     def test(self):
         pass
+
+    def gradcam(self, data_loader):
+
+        test_dataloader = data_loader
+        class_list = ['normal', 'abnormal']
+        self.restore_model()
+
+        for idx, testData in enumerate(test_dataloader):
+
+            patient_id, view_id, test_images, target = testData
+            test_images = test_images.to(self.gpu)
+            target_idx = target.squeeze().cpu().item()
+
+            patient_id = patient_id.squeeze().item()
+            patient_id = str(patient_id).zfill(4)
+
+            view_id = view_id.squeeze().item()
+            view_id = str(view_id).zfill(4)
+
+            _, pred = self.G(test_images)
+            _, indices = torch.max(pred, 1)
+            pred_idx = indices.cpu().item()
+            soft_pred = F.softmax(pred, dim=1)
+
+            print('target idx : ', target_idx, ' pred idx : ', pred_idx)
+
+            prob = float(soft_pred.cpu()[0][target_idx].item()) * 100
+            cam_name = osp.join(self.result_dir, '{}_{:.1f}_{}_{}_{}.png'.format(class_list[target_idx], prob, class_list[pred_idx], patient_id, view_id))
+
+            if cam_name is None:
+                continue
+
+            pred[:, indices].backward()
+
+            # get the gradient of the output with respect to the parameters of the model
+            gradients = self.G.get_activations_gradient()
+            pooled_gradients = torch.mean(gradients, dim=[0, 2, 3]).cpu().numpy()  # GAP#
+
+            # get activation
+            activations = self.G.get_activations().detach()
+
+            # print('activation shape', activations.shape)
+            # print('pooled_gradients shape', pooled_gradients.shape)
+            # activations : (B, C, H, W)
+            cam = np.zeros(dtype=np.float32, shape=activations.shape[1:3])
+            for k, w in enumerate(pooled_gradients):
+                cam += w * activations[k, :, :]
+
+            img = self.denorm(test_images[0]).permute((1, 2, 0)).cpu().numpy()
+            img = np.uint8(255 * img)
+
+            cam = np.maximum(cam, 0)  # Relu
+            heatmap = (cam - cam.min()) / (cam.max() - cam.min())  # Norm
+            heatmap = cv2.resize(heatmap, (img.shape[1], img.shape[0]))  # Resize
+            heatmap = np.where(heatmap < 0.2, 0, heatmap)
+
+            heatmap = np.uint8(255 * heatmap)
+            heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
+
+            H, W, _ = np.shape(heatmap)
+
+            # for h in range(H):
+            #    for w in range(W):
+            #        if np.array_equal(heatmap[h, w], np.array([128, 0, 0])):
+            #            heatmap[h, w] = np.array([0, 0, 0])
+
+            superimposed_img = heatmap * 0.4 + img
+            cv2.imwrite(cam_name, superimposed_img)
+
+
 

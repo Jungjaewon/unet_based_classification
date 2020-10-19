@@ -28,7 +28,9 @@ TRAINING_CONFIG:
 
   # Settings
   NUM_WORKER : 4
-  MODE : 'train'
+  MODE : 'train' # test, gradcam
+  G_MODEL_PATH : '/'
+  D_MODEL_PATH : '/'
   CPU_SEED : 123
   GPU_SEED : 456
   USE_TENSORBOARD : 'False' # 'True' or 'False'

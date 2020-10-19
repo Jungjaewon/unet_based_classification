@@ -18,7 +18,6 @@ class Discriminator(nn.Module):
         self.dis.append(nn.Conv2d(128, 1, kernel_size=3, stride=1, padding=1))
         self.cls.append(nn.AdaptiveAvgPool2d((1,1)))
 
-
         self.base = nn.Sequential(*self.base)
         self.dis = nn.Sequential(*self.dis)
         self.cls = nn.Sequential(*self.cls)
@@ -45,6 +44,10 @@ class ResBlockNet(nn.Module):
 class UNet(nn.Module):
     def __init__(self, in_channels=3, out_channels=3, bilinear=True, LR=0.02, spec_norm=False):
         super(UNet, self).__init__()
+
+        self.gradients = None
+        self.feature = None
+
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.bilinear = bilinear
@@ -85,6 +88,19 @@ class UNet(nn.Module):
         self.conv4 = nn.Sequential(*self.conv4)
         self.fc = nn.Linear(2048, 2)
         self.down_sample = nn.AdaptiveAvgPool2d((2,2))
+        #self.fc = nn.Linear(512, 2)
+        #self.down_sample = nn.AdaptiveAvgPool2d((1,1))
+
+    def activations_hook(self, grad):
+        self.gradients = grad
+
+    # method for the gradient extraction
+    def get_activations_gradient(self):
+        return self.gradients
+
+    # method for the activation exctraction
+    def get_activations(self):
+        return self.feature
 
     def forward(self, x):
 
@@ -109,5 +125,7 @@ class UNet(nn.Module):
 
         x_concat = torch.cat([x_up1, x_conv2, x_conv3, x_conv4],dim=1)
         x_concat = x_concat.view(x_concat.size()[0], -1)
+        x_concat.register_hook(self.activations_hook)
+        self.feature = x_concat
         pred = self.fc(x_concat)
         return image, pred
