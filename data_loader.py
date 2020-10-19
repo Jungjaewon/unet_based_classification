@@ -21,6 +21,7 @@ class DataSet(data.Dataset):
 
         self.data_list = glob.glob(os.path.join(self.img_dir, '*.jpg'))
         self.data_list = list(set(self.data_list))
+        print('len self.data_list  : ', len(self.data_list))
 
     def __getitem__(self, index):
         target, patient_view, _ = self.data_list[index].split(os.sep)[-1].split('_')
