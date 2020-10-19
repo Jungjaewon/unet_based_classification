@@ -11,7 +11,7 @@ TRAINING_CONFIG:
   G_LR : 10e-4
   D_LR : 20e-4
   LAMBDA_G_FAKE  : 1
-  LAMBDA_G_RECON : 30
+  LAMBDA_G_RECON : 10
   LAMBDA_D_FAKE  : 1
   LAMBDA_D_REAL  : 1
   LAMBDA_GP : 20000
@@ -37,8 +37,8 @@ TRAINING_CONFIG:
   D_SPEC : 'True'
 
   # Directory
-  IMG_DIR_TRAIN : 'data'
-  IMG_DIR_TEST : 'data'
+  IMG_DIR_TRAIN : '/home/mlm11/train_1819'
+  IMG_DIR_TEST : '/home/mlm11/test_2020'
   TRAIN_DIR : 'unnet_classification'
   LOG_DIR : 'logs'
   SAMPLE_DIR : 'samples'
@@ -46,7 +46,7 @@ TRAINING_CONFIG:
   MODEL_DIR : 'models'
 
   # GPU
-  GPU: 1
+  GPU: 3
 
   # Step Size
 
