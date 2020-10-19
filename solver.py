@@ -60,6 +60,17 @@ class Solver(object):
         self.d_spec = config['TRAINING_CONFIG']['D_SPEC'] == 'True'
 
         self.gpu = config['TRAINING_CONFIG']['GPU']
+
+        if self.gpu  != '':
+            self.gpu_list = [int(gpu) for gpu in self.gpu .split(',')]
+            self.num_gpu = len(self.gpu_list)
+            if len(self.gpu_list):
+                self.gpu = torch.device('cuda:' + str(self.gpu_list[0]))
+        else:
+            self.num_gpu = 0
+            self.gpu = None
+            self.gpu_list = None
+
         self.use_tensorboard = config['TRAINING_CONFIG']['USE_TENSORBOARD']
 
         # Directory
@@ -82,8 +93,13 @@ class Solver(object):
             self.build_tensorboard()
 
     def build_model(self):
-        self.G = UNet(in_channels=3, out_channels=3, spec_norm=self.g_spec, LR=0.02).to(self.gpu)
-        self.D = Discriminator(in_channel=3, spec_norm=self.d_spec, LR=0.02).to(self.gpu)
+
+        if self.num_gpu > 1:
+            self.G = nn.DataParallel(UNet(in_channels=3, out_channels=3, spec_norm=self.g_spec, LR=0.02)).to(self.gpu)
+            self.D = nn.DataParallel(Discriminator(in_channel=3, spec_norm=self.d_spec, LR=0.02)).to(self.gpu)
+        else:
+            self.G = UNet(in_channels=3, out_channels=3, spec_norm=self.g_spec, LR=0.02).to(self.gpu)
+            self.D = Discriminator(in_channel=3, spec_norm=self.d_spec, LR=0.02).to(self.gpu)
 
         self.g_optimizer = torch.optim.Adam(self.G.parameters(), self.g_lr, (self.beta1, self.beta2))
         self.d_optimizer = torch.optim.Adam(self.D.parameters(), self.d_lr, (self.beta1, self.beta2))
