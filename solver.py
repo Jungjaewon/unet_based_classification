@@ -83,7 +83,7 @@ class Solver(object):
 
     def build_model(self):
         self.G = UNet(in_channels=1, out_channels=1, spec_norm=self.g_spec, LR=0.02).to(self.gpu)
-        self.D = Discriminator(spec_norm=self.d_spec, LR=0.02).to(self.gpu)
+        self.D = Discriminator(in_channel=1, spec_norm=self.d_spec, LR=0.02).to(self.gpu)
 
         self.g_optimizer = torch.optim.Adam(self.G.parameters(), self.g_lr, (self.beta1, self.beta2))
         self.d_optimizer = torch.optim.Adam(self.D.parameters(), self.d_lr, (self.beta1, self.beta2))

@@ -5,7 +5,7 @@ class Discriminator(nn.Module):
     """Discriminator network with PatchGAN.
     W = (W - F + 2P) /S + 1"""
 
-    def __init__(self, in_channel=3, spec_norm=True, LR=0.02):
+    def __init__(self, in_channel=1, spec_norm=True, LR=0.02):
         super(Discriminator, self).__init__()
         self.base = list()
         self.dis = list()
