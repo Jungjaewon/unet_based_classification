@@ -98,10 +98,10 @@ class Solver(object):
 
         if self.num_gpu > 1:
             print("Multi-gpu use")
-            self.G = nn.DataParallel(UNet(in_channels=3, out_channels=3, spec_norm=self.g_spec, LR=0.02), device_ids=self.gpu_list)
+            self.G = nn.DataParallel(UNet(in_channels=3, out_channels=3, spec_norm=self.g_spec, LR=0.02, gpu=self.gpu), device_ids=self.gpu_list)
             self.D = nn.DataParallel(Discriminator(in_channel=3, spec_norm=self.d_spec, LR=0.02), device_ids=self.gpu_list)
         elif self.num_gpu == 1:
-            self.G = UNet(in_channels=3, out_channels=3, spec_norm=self.g_spec, LR=0.02).to(self.gpu)
+            self.G = UNet(in_channels=3, out_channels=3, spec_norm=self.g_spec, LR=0.02, gpu=self.gpu).to(self.gpu)
             self.D = Discriminator(in_channel=3, spec_norm=self.d_spec, LR=0.02).to(self.gpu)
         else:
             self.G = UNet(in_channels=3, out_channels=3, spec_norm=self.g_spec, LR=0.02)
