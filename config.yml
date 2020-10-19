@@ -6,7 +6,7 @@ MODEL_CONFIG:
 TRAINING_CONFIG:
 
   EPOCH: 100
-  BATCH_SIZE: 1
+  BATCH_SIZE: 4
 
   # lr and lambda
   G_LR : 10e-4
