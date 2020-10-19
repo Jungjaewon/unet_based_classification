@@ -30,7 +30,7 @@ class ConvBlock(nn.Module):
                 SpectralNorm(nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False)),
                 nn.BatchNorm2d(out_channels, affine=True, track_running_stats=True),
                 nn.LeakyReLU(LR, inplace=False),
-                SpectralNorm(nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False)),
+                SpectralNorm(nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False)),
                 nn.BatchNorm2d(out_channels, affine=True, track_running_stats=True),
                 nn.LeakyReLU(LR, inplace=False),
             )
@@ -40,7 +40,7 @@ class ConvBlock(nn.Module):
                 nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
                 nn.BatchNorm2d(out_channels, affine=True, track_running_stats=True),
                 nn.LeakyReLU(LR, inplace=False),
-                nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False),
+                nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False),
                 nn.BatchNorm2d(out_channels, affine=True, track_running_stats=True),
                 nn.LeakyReLU(LR, inplace=False),
             )
