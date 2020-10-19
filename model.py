@@ -88,7 +88,6 @@ class UNet(nn.Module):
 
     def forward(self, x):
 
-        print("x : ", x.size())
         # unet part
         x1 = self.inc(x)
         x2 = self.down1(x1)
