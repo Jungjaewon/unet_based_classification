@@ -89,9 +89,9 @@ class Solver(object):
 
         self.build_model()
 
-        self.use_tensorboard = config['TRAINING_CONFIG']['USE_TENSORBOARD']
-        
-        if self.use_tensorboard == 'True':
+        self.use_tensorboard = config['TRAINING_CONFIG']['USE_TENSORBOARD'] == 'True'
+
+        if self.use_tensorboard:
             self.build_tensorboard()
 
     def build_model(self):
