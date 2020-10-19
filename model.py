@@ -43,9 +43,8 @@ class ResBlockNet(nn.Module):
         return self.main(x)
 
 class UNet(nn.Module):
-    def __init__(self, in_channels=3, out_channels=3, bilinear=True, LR=0.02, spec_norm=False, gpu=None):
+    def __init__(self, in_channels=3, out_channels=3, bilinear=True, LR=0.02, spec_norm=False):
         super(UNet, self).__init__()
-        self.gpu = gpu
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.bilinear = bilinear
@@ -108,11 +107,7 @@ class UNet(nn.Module):
         x_conv3 = self.down_sample(self.conv3(x_up3))
         x_conv4 = self.down_sample(self.conv4(x_up4))
 
-        if self.gpu is not None:
-            x_concat = torch.cat([x_up1, x_conv2, x_conv3, x_conv4],dim=1).to(self.gpu)
-        else:
-            x_concat = torch.cat([x_up1, x_conv2, x_conv3, x_conv4], dim=1)
+        x_concat = torch.cat([x_up1, x_conv2, x_conv3, x_conv4],dim=1)
         x_concat = x_concat.view(x_concat.size()[0], -1)
-        print("x_concat :", x_concat.size())
         pred = self.fc(x_concat)
         return image, pred
