@@ -211,10 +211,6 @@ class Solver(object):
                     d_loss = None
 
                     real_score, d_pred = self.D(train_images)
-                    print("d_pred : ", d_pred)
-                    print("d_pred : ", d_pred.size())
-                    print('target : ', target)
-                    print('target : ', target.size())
                     fake_score, _ = self.D(fake_images.detach())
                     d_classification = self.cross_entropy(d_pred, target)
 
@@ -227,7 +223,7 @@ class Solver(object):
                         d_loss_fake = torch.mean(fake_score)
                         alpha = torch.rand(train_images.size(0), 1, 1, 1).to(self.gpu)
                         x_hat = (alpha * train_images.data + (1 - alpha) * fake_images.data).requires_grad_(True)
-                        out_src = self.D(x_hat)
+                        out_src, _ = self.D(x_hat)
                         d_loss_gp = self.gradient_penalty(out_src, x_hat)
                         d_loss = self.lambda_d_real * d_loss_real + self.lambda_d_fake * d_loss_fake + self.lambda_d_gp * d_loss_gp + self.lambda_classification * d_classification
 
