@@ -45,8 +45,8 @@ class UNet(nn.Module):
     def __init__(self, in_channels=3, out_channels=3, bilinear=True, LR=0.02, spec_norm=False):
         super(UNet, self).__init__()
 
-        self.gradients = None
-        self.feature = None
+        #self.gradients = None
+        #self.feature = None
 
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -91,6 +91,7 @@ class UNet(nn.Module):
         #self.fc = nn.Linear(512, 2)
         #self.down_sample = nn.AdaptiveAvgPool2d((1,1))
 
+    """
     def activations_hook(self, grad):
         self.gradients = grad
 
@@ -101,6 +102,7 @@ class UNet(nn.Module):
     # method for the activation exctraction
     def get_activations(self):
         return self.feature
+    """
 
     def forward(self, x):
 
@@ -136,7 +138,7 @@ class UNet(nn.Module):
 
         x_concat = torch.cat([x_up1, x_conv2, x_conv3, x_conv4], dim=1)
         x_concat = x_concat.view(x_concat.size()[0], -1)
-        x_concat.register_hook(self.activations_hook)
-        self.feature = x_concat
+        #x_concat.register_hook(self.activations_hook)
+        #self.feature = x_concat
         pred = self.fc(x_concat)
         return image, pred
